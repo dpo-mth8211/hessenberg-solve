@@ -5,9 +5,10 @@ using LinearAlgebra
 #    Votre fonction ne doit modifier ni R ni b.
 function backsolve(R::UpperTriangular, b)
   x = similar(b)
-  ### votre code ici ; ne rien modifier d'autre
-  # ...
-  ###
+  m=size(R,1)
+ for i=m:-1:1
+  x[i] = (b[i] - dot(R[i, i+1:end], x[i+1:end])) / R[i, i]
+ end 
   return x
 end
 
