@@ -33,11 +33,14 @@ function hessenberg_solve(H::UpperHessenberg, b)
   # ...
   # x = ...
   ###
+  #x = similar(b) 
+
+  x = b
   m = size(H, 1)
   n = size(b, 2)
   u = Vector{typeof(zero(eltype(H)))}(undef, m) # for last rotated col of H
   copyto!(u, 1, H, m * (m - 1) + 1, m) # u .= H[:,m]
-  X = b # not a copy, just rename
+
   cs = Vector{Tuple{real(eltype(u)),eltype(u)}}(undef, length(u)) # store Givens rotations
 
   for k = m:-1:2
@@ -45,21 +48,21 @@ function hessenberg_solve(H::UpperHessenberg, b)
     f1 = u[k]
     g1 = H[k, k-1]
     rho = sqrt(f1*f1 + g1*g1)
-    
+
     c = f1/rho
     s = g1/rho
 
     cs[k] = (c, s)
 
     for i = 1:n
-      X[k, i] /= rho
-      t_1 = s * X[k, i]
-      t_2 = c * X[k, i]
+      x[k, i] /= rho
+      t_1 = s * x[k, i]
+      t_2 = c * x[k, i]
 
       for j = 1:k-2
-        X[j, i] -= u[j] * t_2 + H[j, k-1] * t_1
+        x[j, i] -= u[j] * t_2 + H[j, k-1] * t_1
       end
-      X[k-1, i] -= u[k-1] * t_2 + (H[k-1, k-1]) * t_1
+      x[k-1, i] -= u[k-1] * t_2 + (H[k-1, k-1]) * t_1
     end
 
     for j = 1:k-2
@@ -70,19 +73,19 @@ function hessenberg_solve(H::UpperHessenberg, b)
   end
 
   for i = 1:n
-    tau_1 = X[1, i] / u[1]
+    tau_1 = x[1, i] / u[1]
 
     for j = 2:m
-      tau_2 = X[j, i]
+      tau_2 = x[j, i]
       c, s = cs[j]
-      X[j-1, i] = c * tau_1 + s * tau_2
+      x[j-1, i] = c * tau_1 + s * tau_2
       tau_1 = c * tau_2 - s'tau_1
     end
 
-    X[m, i] = tau_1
+    x[m, i] = tau_1
   end
 
-  return X
+  return x
 end
 
 
