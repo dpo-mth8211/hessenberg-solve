@@ -8,6 +8,10 @@ function backsolve(R::UpperTriangular, b)
   ### votre code ici ; ne rien modifier d'autre
   # ...
   ###
+  n = length(b)
+  for i in n:-1:1
+    x[i] = (b[i] - sum(R[i, j] * x[j] for j in i+1:n; init=0.0)) / R[i, i]
+  end
   return x
 end
 
@@ -23,6 +27,32 @@ function hessenberg_solve(H::UpperHessenberg, b)
   # ...
   # x = ...
   ###
+  n = size(H, 1)
+  for j in 1:n-1
+    for i in j+1:n
+      if H[i, j] != 0.0
+        r = sqrt(H[j, j]^2 + H[i, j]^2)
+        c = H[j, j] / r
+        s = -H[i, j] / r
+
+        for k in j:n
+          temp = c * H[j, k] - s * H[i, k]
+          H[i, k] = s * H[j, k] + c * H[i, k]
+          H[j, k] = temp
+        end
+
+        temp = c * b[j] - s * b[i]
+        b[i] = s * b[j] + c * b[i]
+        b[j] = temp
+      end
+    end
+  end
+
+  x = similar(b)
+  for i in n:-1:1
+    x[i] = (b[i] - sum(H[i, j] * x[j] for j in i+1:n; init=0.0)) / H[i, i]
+  end
+
   return x
 end
 
