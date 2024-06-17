@@ -5,7 +5,6 @@ using LinearAlgebra
 #    Votre fonction ne doit modifier ni R ni b.
 
 function backsolve(R::UpperTriangular, b)
-
     x = similar(b)
     n = length(b)
     
